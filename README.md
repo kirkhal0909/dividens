@@ -1,3 +1,5 @@
+Скрипт https://github.com/kirkhal0909/dividens/blob/master/dividends.py
+
 1) Загружается дивидендый календарь с сайта - https://open-broker.ru/analytics/dividend-calendar/
 2) Берутся последнии даты покупки акций компаний, до которых они выплачивают дивиденды за акцию
 3) берётся диапазон, месяц до этой даты и месяц после.
