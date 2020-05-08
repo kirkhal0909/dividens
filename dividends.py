@@ -125,29 +125,80 @@ def statsCalc(dividendBlock):
               
         return [minBefore,workedDaysMinBefore,maxBefore,workedDaysMaxBefore,
                 closedPriceAtEndDateBuy,closedPriceDayAfter,
-                minAfter,workedDaysMinAfter,maxAfter,workedDaysMaxAfter]
+                minAfter,workedDaysMinAfter,maxAfter,workedDaysMaxAfter,dividendBlock[0]+' ('+dividendBlock[1]+' '+dividendBlock[2]+')']
     else:
         return False
-        
-def statsByYear(year = '',stop_after_none = True):
+
+def statsFormat(stats,easy = True):
+    sign = '>=' if stats[2]>=stats[4] else '<'
+    if easy:
+        formated = "%s\t%d\t%s\t%.2f\t%.2f\t%s\t%d" % (stats[-1],
+                               stats[1],
+                               __findPercent__(stats[0],stats[4]),
+                                stats[4],stats[5],
+                                __findPercent__(stats[4],stats[8]),stats[9])
+    else:
+        formated = "%s\t%.2fp. (%s) %d рабоч.дней_перед\t%.2f\t%.2f\t%.2fp. (%s) %d рабоч.дней_после" % (stats[-1],
+                                    stats[0],__findPercent__(stats[0],stats[4]),stats[1], #__findPercent__(stats[2],stats[4]),
+                                     stats[4],stats[5],
+                                     #__findPercent__(stats[4],stats[6]),
+                                     stats[8],
+                                     __findPercent__(stats[4],stats[8]),stats[9])
+    #print(formated)
+    return formated.replace('\t',';')
+   
+def statsFromYear(year = '',stop_after_none = True,writeToFile=True,easyOut = True):
     if not year:
         dividends = dividends_download.downloadData()
     else:
         dividends = dividends_download.downloadData(year)
     stats = []
+    if writeToFile:
+                import os
+                folderName = 'info'
+                if not os.path.exists(folderName):
+                    os.mkdir(folderName)
+                fileName = folderName+'/'
+                if not year:
+                    fileName += 'current_year.csv'
+                else:
+                    fileName += str(year)+'.csv'
+                file = open(fileName,'w')
+                if easyOut:
+                    file.write('Компания(последняя дата покупки дивидендов);')
+                    file.write('Рабочих дней от минимальной стоимости до конечной даты;')
+                    file.write('От минимальной стоимости до стоимости в последней дате;')
+                    file.write('Стоимость акции в последний день для получения дивидендов;')
+                    file.write('Стоимость акции на следующий день после последнего дня покупки для получения дивидендов;')
+                    file.write('От стоимости с последней даты до максимальной стоимости после;')
+                    file.write('Рабочих дней от конечной даты до максимальной стоимости;')
+                else:
+                    file.write('Компания(последняя дата покупки дивидендов);')
+                    file.write('Минимальная стоимость за месяц перед последней датой;')
+                    file.write('Стоимость акции в последний день;')
+                    file.write('Стоимость акции на следующий день после последней даты;')
+                    file.write('Максимальная стоимость за месяц после последней даты;')
+                file.write('\n')
+                file.close()
     for pos in range(len(dividends)):        
         stat = statsCalc(dividends[pos])
         print('downloaded %d from %d records' % ((pos+1),len(dividends)))
         if stat:
+            if writeToFile:
+                file = open(fileName,'a')
+                file.write(statsFormat(stat)+'\n')
+                file.close()
             stats.append(stat)
         elif stop_after_none:
             return stats
     return stats
 
-s = statsByYear()
+s = statsFromYear(2017)
 
 #dividends = dividends_download.downloadData()
 #period = __downloadPeriod__(dividends[0])
+#s = statsCalc(dividends[0])
+#print(statsFormat(s))
 
 '''
 for pos in range(len(dividends)):
